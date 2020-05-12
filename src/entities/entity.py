@@ -15,16 +15,14 @@ class Entity:
         self.x = x
         self.y = y
         self.solid = solid  # does the entity block movement into its square?
-        self.components = []
+
+        # component slots. As much as I wanted to just have a list of components, this makes everything
+        #  interact/check nicer.
+        self.ai = None
+        self.turn_taker = None
+        self.player = None
 
         self.level = None  # the level this entity is in. Filled out when the entity is added to a level in level.py
-
-        # if the component list is only one component, change it to a list. In case I use this wrong later.
-        if isinstance(self.components, Component):
-            self.components = [self.components]
-
-    def add_component(self, component:Component):
-        self.components.append(component)
 
     def move(self, direction:Direction):
         # move by 1 tile in given direction
@@ -46,9 +44,8 @@ class Entity:
     def change_energy(self, difference):
         # alters TurnTaker's energy if it has one.
         # returns True if a turntaker exists, false otherwise.
-        turn_taker = next((component for component in self.components if isinstance(component, TurnTaker)), None)
-        if turn_taker:
-            turn_taker.change_energy(difference)
+        if self.turn_taker:
+            self.turn_taker.change_energy(difference)
             return True
         else:
             return False

@@ -22,16 +22,5 @@ class TurnTaker(Component):
 
         return False
 
-    def take_turn(self):
-        self.energy = 0 # sets back to 0 before taking action. No multi-turn energy buildup (yet?)
-        print("entity ", self.owner.name, " taking turn!")
-
-        # searches other attached components for a turn() function and calls it- will be in AI or Player components.
-        for component in self.owner.components:
-            if callable(getattr(component, 'turn', False)):
-                component.turn()
-
-        self.energy -= 500
-
     def change_energy(self, difference):
         self.energy += difference

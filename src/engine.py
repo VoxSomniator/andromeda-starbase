@@ -25,8 +25,9 @@ class Game:
     def __init__(self):
         self.constants = setup_game.get_constants()
         self.player = Entity('Player', Tile('◉', (255, 255, 255)), 20, 20, solid=True)
-        self.player.add_component(player.Player(self.player))
-        self.player.add_component(turn_taker.TurnTaker(self.player, 200))
+        self.player.player = player.Player(self.player)
+        self.player.turn_taker = turn_taker.TurnTaker(self.player, 200)
+
         self.level = Level(90, 55)
         self.level.add_entity(self.player)
 
@@ -37,10 +38,8 @@ class Game:
         self.game_state = GameStates.PROCESS_TURNS
 
         test_critter = Entity(name='Critter', x=30, y=30, solid=True)
-        test_critter_turns = turn_taker.TurnTaker(test_critter, 100)
-        test_critter_jiggle = ai_jiggle.AiJiggle(test_critter)
-        test_critter.add_component(test_critter_turns)
-        test_critter.add_component(test_critter_jiggle)
+        test_critter.turn_taker = turn_taker.TurnTaker(test_critter, 100)
+        test_critter.ai = ai_jiggle.AiJiggle(test_critter)
         self.level.add_entity(test_critter)
 
         self.start_game()
@@ -100,14 +99,13 @@ class Game:
         self.current_entity = self.time_manager.get_next_turn(self.level.entities)
 
         # check if it's a player
-        if any(isinstance(item, player.Player) for item in self.current_entity.components):
+        if self.current_entity.player:
             self.game_state = GameStates.PLAYER_TURN
             return
 
         else:
             self.game_state = GameStates.ENEMY_TURN
             return
-
 
     def state_player_turn(self):
         # process player turn. returns True to quit the game.
@@ -127,10 +125,8 @@ class Game:
     def state_enemy_turn(self, entity):
         print(entity.name)
         if entity:
-            for component in entity.components:
-                if callable(getattr(component, 'turn', False)):
-                    print(component)
-                    component.turn()
+            if entity.ai:
+                    entity.ai.turn()
         else:
             print("Problem- enemy turn called on None object")
 

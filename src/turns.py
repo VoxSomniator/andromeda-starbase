@@ -57,15 +57,18 @@ class TimeManager:
         while not self.active_turn_takers:
             self.process_tick(entities)
 
-        return self.active_turn_takers.pop(0).owner
+        next_turn_taker = self.active_turn_takers.pop(0)
+        # resets to 0 energy before taking action
+        next_turn_taker.energy = 0
+
+        return next_turn_taker.owner
 
     def find_all_turn_takers(self, entities):
         # returns a list of TurnTaker objects. We don't need to deal with the entities they're part of I don't think.
         turn_takers = []
 
         for entity in entities:
-            for component in entity.components:
-                if isinstance(component, TurnTaker):
-                    turn_takers.append(component)
+            if entity.turn_taker:
+                turn_takers.append(entity.turn_taker)
 
         return turn_takers
