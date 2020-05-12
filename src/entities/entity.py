@@ -1,6 +1,7 @@
 # In-world entities like items and creatures.
 # Basically everything except terrain and networks.
 from src.entities.components.component import Component
+from src.entities.components.turn_taker import TurnTaker
 from src.geometry import Direction, direction_coordinate
 from src.world.tiles import Tile
 
@@ -37,3 +38,17 @@ class Entity:
 
         self.x = target_x
         self.y = target_y
+
+        # reduce energy.
+        # todo - incorporate Creature Stats
+        self.change_energy(-1000)
+
+    def change_energy(self, difference):
+        # alters TurnTaker's energy if it has one.
+        # returns True if a turntaker exists, false otherwise.
+        turn_taker = next((component for component in self.components if isinstance(component, TurnTaker)), None)
+        if turn_taker:
+            turn_taker.change_energy(difference)
+            return True
+        else:
+            return False

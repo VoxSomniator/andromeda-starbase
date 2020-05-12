@@ -32,3 +32,6 @@ class TurnTaker(Component):
                 component.turn()
 
         self.energy -= 500
+
+    def change_energy(self, difference):
+        self.energy += difference

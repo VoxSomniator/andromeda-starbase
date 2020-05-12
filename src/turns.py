@@ -23,36 +23,49 @@ In order of most energy to least, every entity's energy is set back to 0 and it 
 
 Most AI things will call their AI component and take their turn, while the player entity's TurnTaker will
     switch to the "player input" gamestate and wait for instructions.
+
+
+game state wise:
+by default, in "PROCESS_TURNS" mode. Saves the current turn order, and when the player comes up, diverts to
+    PLAYER_TURN mode.
 """
 
-def process_tick(entities):
-    # called every game loop to do entity logic.
-    print("debug- tick called.")
+class TimeManager:
 
-    turn_takers = find_all_turn_takers(entities)  # turntaker components
-    active_turn_takers = []  # those with non-negative energy
+    def __init__(self):
+        self.active_turn_takers = [] #  entities with non-negative energy waiting to take their turns.
 
-    # tick all of them, add actives to the list
-    for component in turn_takers:
-        if component.tick():
-            active_turn_takers.append(component)
+    def process_tick(self, entities):
+        # called whenever the active turn takers list is empty, to progress time and get new active entities.
+        # no return, alters self.active_turn_takers. Only for internal use!
+        self.active_turn_takers = []
 
-    active_turn_takers.sort(key=attrgetter('energy'), reverse=True)
+        turn_takers = self.find_all_turn_takers(entities)  # turntaker components
 
-    # set off turns for active entities in order.
-    for component in active_turn_takers:
-        component.take_turn()
+        # tick all of them, add actives to the list
+        for component in turn_takers:
+            if component.tick():
+                self.active_turn_takers.append(component)
 
+        self.active_turn_takers.sort(key=attrgetter('energy'), reverse=True)
 
-    return
+    def get_next_turn(self, entities):
+        # called at the start of every PROCESS_TURNS loop.
+        # if there are entities waiting to take their turns, return the first.
+        # if no entities are waiting, process the next tick.
 
-def find_all_turn_takers(entities):
-    # returns a list of TurnTaker objects. We don't need to deal with the entities they're part of I don't think.
-    turn_takers = []
+        while not self.active_turn_takers:
+            self.process_tick(entities)
 
-    for entity in entities:
-        for component in entity.components:
-            if isinstance(component, TurnTaker):
-                turn_takers.append(component)
+        return self.active_turn_takers.pop(0).owner
 
-    return turn_takers
+    def find_all_turn_takers(self, entities):
+        # returns a list of TurnTaker objects. We don't need to deal with the entities they're part of I don't think.
+        turn_takers = []
+
+        for entity in entities:
+            for component in entity.components:
+                if isinstance(component, TurnTaker):
+                    turn_takers.append(component)
+
+        return turn_takers
