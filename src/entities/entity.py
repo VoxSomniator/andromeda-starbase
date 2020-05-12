@@ -18,9 +18,11 @@ class Entity:
 
         # component slots. As much as I wanted to just have a list of components, this makes everything
         #  interact/check nicer.
+        # components are added post-instantiation.
         self.ai = None
         self.turn_taker = None
         self.player = None
+        self.stats = None
 
         self.level = None  # the level this entity is in. Filled out when the entity is added to a level in level.py
 
@@ -37,9 +39,10 @@ class Entity:
         self.x = target_x
         self.y = target_y
 
+        if self.stats:
+            self.change_energy(-self.stats.move_cost)
+
         # reduce energy.
-        # todo - incorporate Creature Stats
-        self.change_energy(-1000)
 
     def change_energy(self, difference):
         # alters TurnTaker's energy if it has one.

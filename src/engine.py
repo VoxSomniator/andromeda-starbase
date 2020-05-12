@@ -17,6 +17,7 @@ from src.entities.components import player
 # imports for testing entities
 from src.entities.components import turn_taker
 from src.entities.components import ai_jiggle
+from src.entities.components import stats
 
 
 class Game:
@@ -26,7 +27,8 @@ class Game:
         self.constants = setup_game.get_constants()
         self.player = Entity('Player', Tile('◉', (255, 255, 255)), 20, 20, solid=True)
         self.player.player = player.Player(self.player)
-        self.player.turn_taker = turn_taker.TurnTaker(self.player, 200)
+        self.player.turn_taker = turn_taker.TurnTaker(self.player)
+        self.player.stats = stats.Stats(self.player, 1000, 200)
 
         self.level = Level(90, 55)
         self.level.add_entity(self.player)
@@ -38,8 +40,9 @@ class Game:
         self.game_state = GameStates.PROCESS_TURNS
 
         test_critter = Entity(name='Critter', x=30, y=30, solid=True)
-        test_critter.turn_taker = turn_taker.TurnTaker(test_critter, 100)
+        test_critter.turn_taker = turn_taker.TurnTaker(test_critter)
         test_critter.ai = ai_jiggle.AiJiggle(test_critter)
+        test_critter.stats = stats.Stats(test_critter, 1000, 100)
         self.level.add_entity(test_critter)
 
         self.start_game()
