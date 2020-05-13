@@ -1,6 +1,7 @@
 # testing AI, makes the entity random-walk around
 from src.entities.components.component import Component
 from src.geometry import Direction
+import random
 
 
 class AiJiggle(Component):
@@ -11,4 +12,4 @@ class AiJiggle(Component):
     def turn(self):
         # implement "turn" methods in any ai components
         # todo - ai component superclass?
-        self.owner.move(Direction.e)
+        self.owner.move(random.choice(list(Direction)))

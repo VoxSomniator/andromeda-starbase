@@ -4,7 +4,7 @@
 
 class Tile:
 
-    def __init__(self, glyph, fg_color, bg_color=(0, 0, 0)):
+    def __init__(self, glyph='?', fg_color=(255, 0, 255), bg_color=(0, 0, 0)):
         # glyph is a character, color is a (int, int, int) but can use the dictionary
         self.glyph = glyph
         self.fg = fg_color

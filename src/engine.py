@@ -126,7 +126,6 @@ class Game:
                 self.game_state = GameStates.PROCESS_TURNS
 
     def state_enemy_turn(self, entity):
-        print(entity.name)
         if entity:
             if entity.ai:
                     entity.ai.turn()
