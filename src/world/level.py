@@ -95,6 +95,9 @@ class Level():
 
     def is_square_blocked(self, x, y):
         # checks for solid obstructions- terrain or blocking entities.
+        # bounds
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return True
         # structures
         if self.structures[x][y]:
             if self.structures[x][y].impassible:

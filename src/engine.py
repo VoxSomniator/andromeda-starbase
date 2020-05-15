@@ -24,9 +24,8 @@ class Game:
     # the game. whole thing.
 
     def __init__(self):
-        self.constants = setup_game.get_constants()
-
-        self.level = Level(90, 55)
+        self.level = Level(200, 200)
+        self.renderer = rendering.Renderer(rendering.Window(2, 2, 86, 41))
 
         # testing entities, move to spawning code somewhere later.
         self.player = Entity('Player', Tile('◉', (255, 255, 255)), 20, 20, solid=True)
@@ -41,6 +40,7 @@ class Game:
         test_critter.stats = stats.Stats(test_critter, 1000, 100)
         self.level.add_entity(test_critter)
 
+        # game state
         self.time_manager = TimeManager()
         self.current_entity = None # current entity taking its turn
 
@@ -55,11 +55,7 @@ class Game:
         tcod.console_set_custom_font('fonts/consolas12x12_gs_tc.png',
                                      tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE)
 
-        self.main_console:tcod.Console = tcod.console_init_root(w=self.constants['screen_width'],
-                                                                h=self.constants['screen_height'],
-                                                                title=self.constants['window_title'], fullscreen=False,
-                                                                renderer=self.constants['renderer'], order='F',
-                                                                vsync=True)
+
 
         while not tcod.console_is_window_closed():
 
@@ -96,7 +92,7 @@ class Game:
                 self.update_screen()
                 self.screen_changed = False
 
-            time.sleep(0.04)  # this just makes the game pause between every loop so it doesn't throttle the CPU
+            time.sleep(0.012)  # this just makes the game pause between every loop so it doesn't throttle the CPU
                             # todo - button event queue thing
 
     def state_process_turn(self):
@@ -140,8 +136,4 @@ class Game:
         self.game_state = GameStates.PROCESS_TURNS
 
     def update_screen(self):
-        rendering.render_all(self.main_console, self.level, self.constants['screen_width'],
-                             self.constants['screen_height'], viewport_x=2, viewport_y=2,
-                             viewport_width=self.constants['screen_width'] - 4,
-                             viewport_height=self.constants['screen_height'] - 4,
-                             camera_x=self.player.x - 43, camera_y=self.player.y - 23)
+        self.renderer.render_all(self.level, camera_x=self.player.x, camera_y=self.player.y)
