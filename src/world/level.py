@@ -41,17 +41,6 @@ class Level():
         entity.level = self
         self.entities.append(entity)
 
-    def display_map(self):
-        # returns an array of Tiles, whatever is to be displayed. Generally topmost items.
-        # todo - implement get_rect_tiles, rendering, and remove this entirely
-        tiles = [[Tile('X', (255, 0, 0), (255, 255, 255)) for y in range(self.height)] for x in range(self.width)]
-
-        for x in range(self.width):
-            for y in range(self.height):
-                tiles[x][y] = self.get_tile_at(x, y)
-
-        return tiles
-
     def get_tile_at(self, x, y, void_tile:Tile=Tile()):
         # returns the tile for a specific coordinate. Entities on top, then constructions, floors, networks, and terrain.
         # if coordinates are out of level bound, return void tile.

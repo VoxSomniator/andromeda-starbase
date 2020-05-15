@@ -93,12 +93,7 @@ class Game:
 
             # update screen
             if self.screen_changed:
-                rendering.render_all(self.main_console, self.level, self.constants['screen_width'],
-                                     self.constants['screen_height'], viewport_x=2, viewport_y=2,
-                                     viewport_width=self.constants['screen_width']-4,
-                                     viewport_height=self.constants['screen_height']-4,
-                                     camera_x=self.player.x - 43, camera_y=self.player.y - 23)
-                # self.update_screen(self.main_console)
+                self.update_screen()
                 self.screen_changed = False
 
             time.sleep(0.04)  # this just makes the game pause between every loop so it doesn't throttle the CPU
@@ -144,20 +139,9 @@ class Game:
         self.screen_changed = True  # todo - maybe make this smarter? small performance thing.
         self.game_state = GameStates.PROCESS_TURNS
 
-    def update_screen(self, console:tcod.Console):
-        # clear screen
-        console.clear(ch=ord(' '), fg=(255, 255, 255), bg=(0, 0, 0))
-
-        # draw new things, player etc
-        tiles = self.level.display_map()
-        for x in range(self.level.width):
-            for y in range(self.level.height):
-                console.default_fg = tiles[x][y].fg
-                console.default_bg = tiles[x][y].bg
-                console.put_char(x, y, ord(tiles[x][y].glyph))
-
-        console.default_fg = (255, 255, 255)
-        console.default_bg = (0, 0, 0)
-
-        # flush console to screen
-        tcod.console_flush(console)
+    def update_screen(self):
+        rendering.render_all(self.main_console, self.level, self.constants['screen_width'],
+                             self.constants['screen_height'], viewport_x=2, viewport_y=2,
+                             viewport_width=self.constants['screen_width'] - 4,
+                             viewport_height=self.constants['screen_height'] - 4,
+                             camera_x=self.player.x - 43, camera_y=self.player.y - 23)
