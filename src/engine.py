@@ -1,7 +1,7 @@
 # game loop!
 # start_game is called from Main on launch and contains the whole loop I guess.
 
-from src import setup_game
+from src import setup_game, rendering
 import tcod
 import time
 from src import input_handlers
@@ -25,25 +25,27 @@ class Game:
 
     def __init__(self):
         self.constants = setup_game.get_constants()
+
+        self.level = Level(90, 55)
+
+        # testing entities, move to spawning code somewhere later.
         self.player = Entity('Player', Tile('◉', (255, 255, 255)), 20, 20, solid=True)
         self.player.player = player.Player(self.player)
         self.player.turn_taker = turn_taker.TurnTaker(self.player)
         self.player.stats = stats.Stats(self.player, 1000, 200)
-
-        self.level = Level(90, 55)
         self.level.add_entity(self.player)
+
+        test_critter = Entity(name='Critter', x=25, y=20, solid=True)
+        test_critter.turn_taker = turn_taker.TurnTaker(test_critter)
+        test_critter.ai = ai_jiggle.AiJiggle(test_critter)
+        test_critter.stats = stats.Stats(test_critter, 1000, 100)
+        self.level.add_entity(test_critter)
 
         self.time_manager = TimeManager()
         self.current_entity = None # current entity taking its turn
 
         self.quit_game = False
         self.game_state = GameStates.PROCESS_TURNS
-
-        test_critter = Entity(name='Critter', x=30, y=30, solid=True)
-        test_critter.turn_taker = turn_taker.TurnTaker(test_critter)
-        test_critter.ai = ai_jiggle.AiJiggle(test_critter)
-        test_critter.stats = stats.Stats(test_critter, 1000, 100)
-        self.level.add_entity(test_critter)
 
         self.start_game()
 
@@ -91,7 +93,12 @@ class Game:
 
             # update screen
             if self.screen_changed:
-                self.update_screen(self.main_console)
+                rendering.render_all(self.main_console, self.level, self.constants['screen_width'],
+                                     self.constants['screen_height'], viewport_x=2, viewport_y=2,
+                                     viewport_width=self.constants['screen_width']-4,
+                                     viewport_height=self.constants['screen_height']-4,
+                                     camera_x=self.player.x - 43, camera_y=self.player.y - 23)
+                # self.update_screen(self.main_console)
                 self.screen_changed = False
 
             time.sleep(0.04)  # this just makes the game pause between every loop so it doesn't throttle the CPU

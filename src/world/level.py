@@ -43,32 +43,64 @@ class Level():
 
     def display_map(self):
         # returns an array of Tiles, whatever is to be displayed. Generally topmost items.
-        # todo - change to display a section of the map, for scrolling viewport
+        # todo - implement get_rect_tiles, rendering, and remove this entirely
         tiles = [[Tile('X', (255, 0, 0), (255, 255, 255)) for y in range(self.height)] for x in range(self.width)]
 
-        # add terrain
         for x in range(self.width):
             for y in range(self.height):
-                if self.terrain[x][y]:
-                    tiles[x][y] = Tile('▓', (120, 120, 120), (0, 0, 0))
-                else:
-                    tiles[x][y] = Tile('▓', (30, 10, 30), (0, 0, 0))
+                tiles[x][y] = self.get_tile_at(x, y)
 
-        # add structures
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.structures[x][y]:
-                    tiles[x][y] = self.structures[x][y].tile
+        return tiles
 
-        # add entities
+    def get_tile_at(self, x, y, void_tile:Tile=Tile()):
+        # returns the tile for a specific coordinate. Entities on top, then constructions, floors, networks, and terrain.
+        # if coordinates are out of level bound, return void tile.
+
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return void_tile
+
+        location_entities = []
         for entity in self.entities:
-            # check if entity in in bounds
-            if entity.x < self.width and entity.x >=0 and entity.y < self.height and entity.y >= 0:
+            if entity.x == x and entity.y == y:
+                location_entities.append(entity)
+        # eventually add entity ordering here, like creatures being on top of items. For now just return the first.
+        if location_entities:
+            return location_entities[0].tile
 
-                # if entity has a tile, add it, or error character
-                if isinstance(entity.tile, Tile):
-                    tiles[entity.x][entity.y] = entity.tile
-                else: tiles[entity.x][entity.y] = Tile('?', (255, 0, 255), (0, 255, 0))
+        if self.structures[x][y]:
+            return self.structures[x][y].tile
+
+        # terrain hardcoding. Either make this work more like terrain later, or just make the hardcoded values
+        #  constants/level-dependent variables.
+        if self.terrain[x][y]:
+            return Tile('▓', (120, 120, 120), (0, 0, 0))
+        elif not self.terrain[x][y]:
+            return Tile('▓', (30, 10, 30), (0, 0, 0))
+
+        # if this appears something has gone terribly wrong or I forgot to implement a new type of thing
+        return Tile('!', (255, 0, 0), (0, 0, 0))
+
+    def get_rect_tiles(self, start_x:int, start_y:int, width:int, height:int, void_tile:Tile=Tile()):
+        # returns a grid of tiles for a specific subsection of the map, with void_tile for out-of-bounds squares.
+        # start_x and start_y CAN be negative! Width and height should be positive.
+        tiles= [[Tile('X', (255, 0, 0), (255, 255, 255)) for y in range(height)] for x in range(width)]
+
+        # the tile grid, representing the screen, will be iterated over.
+        # for every tile grid coordinate, add the start_x and _y values to get the world coordinate.
+        # if it's out of world bounds, add the void_tile.
+
+        # note to self don't mix up width and self.width
+
+        for x in range(width):
+            for y in range(height):
+                world_x = x + start_x
+                world_y = y + start_y
+                if world_x < 0 or world_x >= self.width or world_y < 0 or world_y >= self.height:
+                    # tile out of bounds
+                    tiles[x][y] = void_tile
+                else:
+                    # tile in bounds hooray
+                    tiles[x][y] = self.get_tile_at(x+start_x, y+start_y)
 
         return tiles
 
