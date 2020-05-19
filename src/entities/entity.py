@@ -23,6 +23,7 @@ class Entity:
         self.turn_taker = None
         self.player = None
         self.stats = None
+        self.vision = None
 
         self.level = None  # the level this entity is in. Filled out when the entity is added to a level in level.py
 
@@ -42,7 +43,8 @@ class Entity:
         if self.stats:
             self.change_energy(-self.stats.move_cost)
 
-        # reduce energy.
+        if self.vision:
+            self.vision.update_fov()
 
     def change_energy(self, difference):
         # alters TurnTaker's energy if it has one.

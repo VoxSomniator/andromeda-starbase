@@ -2,6 +2,7 @@
 from src.world.tiles import Tile
 from src.entities.entity import Entity
 from src.world.structure import Structure
+import tcod
 
 
 class Level():
@@ -36,6 +37,17 @@ class Level():
             grid[13][y] = Structure('wall', True, True, Tile('╬', (200, 200, 200)))
 
         return grid
+
+    def get_fov_map(self):
+        # returns the opacity/solidity map for this level.
+        fov_map = tcod.map.Map(self.width, self.height)
+
+        for x in range(self.width):
+            for y in range(self.height):
+                fov_map.walkable[y][x] = not self.is_square_blocked(x, y)
+                fov_map.transparent[y][x] = not self.is_square_opaque(x, y)
+
+        return fov_map
 
     def add_entity(self, entity:Entity):
         entity.level = self
@@ -89,9 +101,33 @@ class Level():
                     tiles[x][y] = void_tile
                 else:
                     # tile in bounds hooray
-                    tiles[x][y] = self.get_tile_at(x+start_x, y+start_y)
+                    tiles[x][y] = self.get_tile_at(world_x, world_y)
 
         return tiles
+
+    def get_rect_tiles_in_fov(self, start_x:int, start_y:int, width:int, height:int, void_tile:Tile=Tile(),
+                              fov_entity:Entity=None, unseen_tile=Tile('X', (0, 0, 255))):
+        # works like get_rect_tiles, except tiles outside an entity's FOV are covered with unseen_tile.
+        # if there's no entity, just returns the same as get_rect_tiles.
+        if not fov_entity:
+            return self.get_rect_tiles(start_x, start_y, width, height, void_tile)
+        else:
+            tiles= [[Tile('X', (255, 0, 0), (255, 255, 255)) for y in range(height)] for x in range(width)]
+
+            for x in range(width):
+                for y in range(height):
+                    world_x = x + start_x
+                    world_y = y + start_y
+                    if world_x < 0 or world_x >= self.width or world_y < 0 or world_y >= self.height:
+                        tiles[x][y] = void_tile
+                    else:
+                        if fov_entity.vision and fov_entity.vision.is_square_visible(world_x, world_y):
+                            tiles[x][y] = self.get_tile_at(world_x, world_y)
+                        else:
+                            tiles[x][y] = unseen_tile
+
+            return tiles
+
 
     def is_square_blocked(self, x, y):
         # checks for solid obstructions- terrain or blocking entities.
@@ -105,6 +141,16 @@ class Level():
         # entities
         for entity in self.entities:
             if entity.x == x and entity.y == y and entity.solid:
+                return True
+
+        return False
+
+    def is_square_opaque(self, x, y):
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return True
+        # structures
+        if self.structures[x][y]:
+            if self.structures[x][y].opaque:
                 return True
 
         return False

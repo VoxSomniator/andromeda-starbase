@@ -18,13 +18,14 @@ from src.entities.components import player
 from src.entities.components import turn_taker
 from src.entities.components import ai_jiggle
 from src.entities.components import stats
+from src.entities.components import vision
 
 
 class Game:
     # the game. whole thing.
 
     def __init__(self):
-        self.level = Level(200, 200)
+        self.level = Level(200, 140)
         self.renderer = rendering.Renderer(rendering.Window(2, 2, 86, 41))
 
         # testing entities, move to spawning code somewhere later.
@@ -33,6 +34,7 @@ class Game:
         self.player.turn_taker = turn_taker.TurnTaker(self.player)
         self.player.stats = stats.Stats(self.player, 1000, 200)
         self.level.add_entity(self.player)
+        self.player.vision = vision.Vision(self.player, 30)
 
         test_critter = Entity(name='Critter', x=25, y=20, solid=True)
         test_critter.turn_taker = turn_taker.TurnTaker(test_critter)
@@ -136,4 +138,4 @@ class Game:
         self.game_state = GameStates.PROCESS_TURNS
 
     def update_screen(self):
-        self.renderer.render_all(self.level, camera_x=self.player.x, camera_y=self.player.y)
+        self.renderer.render_all(self.level, camera_x=self.player.x, camera_y=self.player.y, fov_entity=self.player)

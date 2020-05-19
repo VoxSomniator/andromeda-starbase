@@ -36,13 +36,14 @@ class Renderer:
                                                                  vsync=True)
 
 
-    def render_all(self, level, camera_x, camera_y):
+    def render_all(self, level, camera_x, camera_y, fov_entity):
         # viewport x/y: position of the viewport on the screen
         # camera x/y: position of the viewport's in-world view
 
         # renders the WHOLE SCREEN. Call every frame/update for full refresh.
 
-        viewport_console = self.render_viewport(level, camera_x, camera_y, self.viewport.width, self.viewport.height)
+        viewport_console = self.render_viewport(level, camera_x, camera_y, self.viewport.width, self.viewport.height,
+                                                fov_entity)
 
         self.main_console.clear(ch=ord(' '), fg=(255, 255, 255), bg=(255, 255, 255))
 
@@ -56,7 +57,7 @@ class Renderer:
         tcod.console_flush(console=self.main_console, keep_aspect=True, integer_scaling=True)
         pass
 
-    def render_viewport(self, level, center_x, center_y, width, height):
+    def render_viewport(self, level, center_x, center_y, width, height, fov_entity):
         # renders the view of the world/level. Does not include UIs like targeting lines.
         # returns an offscreen console of the viewport. Coordinates are in level-space.
         # implement FOV here later.
@@ -64,7 +65,7 @@ class Renderer:
         start_x = center_x - int(round(width/2.0))
         start_y = center_y - int(round(height/2.0))
 
-        area_tiles = level.get_rect_tiles(start_x, start_y, width, height)
+        area_tiles = level.get_rect_tiles_in_fov(start_x, start_y, width, height, fov_entity=fov_entity)
 
         viewport_console = tcod.console.Console(width, height, 'F')
 
